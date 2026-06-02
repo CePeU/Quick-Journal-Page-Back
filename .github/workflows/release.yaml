@@ -1,0 +1,45 @@
+name: Quick Journal Page Back
+
+permissions:
+  contents: write  # Add this
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to use for release'
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Zip output
+        run: |
+          mkdir quick-journal-page-back
+          mkdir quick-journal-page-back/scripts
+          mkdir quick-journal-page-back/styles
+          mkdir quick-journal-page-back/lang
+          cp module.json ./quick-journal-page-back/
+          cp ./scripts/*.js ./quick-journal-page-back/scripts/
+          cp ./lang/*.json ./quick-journal-page-back/lang/
+          zip -r quick-journal-page-back.zip quick-journal-page-back
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Handle both trigger types, github.event.inputs.tag is for getting the tag manual. If not found the automatic tag retrieval is used.
+          # input events are only available for manual events aka workflow_dispatch events.
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          
+          gh release create "$tag" \
+            --title="Release $tag" \
+            --draft \
+            module.json quick-journal-page-back.zip
