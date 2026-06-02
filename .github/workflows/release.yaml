@@ -28,6 +28,7 @@ jobs:
           mkdir quick-journal-page-back/lang
           cp module.json ./quick-journal-page-back/
           cp ./scripts/*.js ./quick-journal-page-back/scripts/
+          cp ./styles/*.css ./quick-journal-page-back/styles/
           cp ./lang/*.json ./quick-journal-page-back/lang/
           zip -r quick-journal-page-back.zip quick-journal-page-back
 
