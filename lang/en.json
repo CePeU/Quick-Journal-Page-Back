@@ -1,0 +1,7 @@
+{
+  "QJPB.Back": "Back",
+  "QJPB.Forward": "Forward",
+  "QJPB.Disabled": "No further pages in que",
+  "QJPB.HistoryLength":"Que lenght",
+  "QJPB.HistoryLengthHint": "Maximum of keept pages for backlog"
+}

@@ -1,0 +1,7 @@
+{
+  "QJPB.Back": "Zurück",
+  "QJPB.Forward": "Vorwärts",
+  "QJPB.Disabled": "Keine weiteren Seiten im Verlauf",
+  "QJPB.HistoryLength":"Verlaufslänge",
+  "QJPB.HistoryLengthHint": "Maximale gespeicherte Seiten pro Benutzer."
+}
