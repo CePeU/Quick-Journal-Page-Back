@@ -159,8 +159,6 @@ Hooks.once("init", () => {
             const qjpsButtonExists = html.querySelector("aside.journal-sidebar .qjpb") ?? false;
             if (qjpsButtonExists) return;
             qjpbButtonCreation(sheet, html)
-            const entryId = this.document.id;
-    
         })
     };
   

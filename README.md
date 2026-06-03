@@ -5,3 +5,7 @@ A little module which adds a back and forward button which will navigate to the 
 You can set the length of your history. Any forward history will be erased once you select manually (not by button) a new page.
 
 Can be used together with Quick-Journal-Page-Sort
+
+The module can be installed with this link from the Foundry module page:
+
+https://github.com/CePeU/Quick-Journal-Page-Back/releases/latest/download/module.json
