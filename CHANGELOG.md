@@ -1,3 +1,12 @@
+## [1.0.2] / 2026-06-03
+### Added
+### Fixed
+- bug in setting declaration (copy past error)
+### Changed
+### Removed
+### Deprecated
+### Security
+
 ## [1.0.1] / 2026-06-03
 ### Added
 - setting for changing button size

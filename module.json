@@ -2,7 +2,7 @@
   "id": "quick-journal-page-back",
   "title": "Quick-Journal-Page-Back",
   "description": "Buttons for forward and backward navigation and history of the last visited pages. Compatible with v13 and v14.",
-  "version": "1.0.1",
+  "version": "1.0.2",
 "authors": [
     {
       "name": "CePeU",

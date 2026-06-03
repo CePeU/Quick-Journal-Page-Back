@@ -190,7 +190,7 @@ Hooks.once("init", () => {
     range: { min: 2, max: 50, step:1 }
   });
 
-    game.settings.register("quick-journal-page-sort", "qjpsFontSize", {
+    game.settings.register("quick-journal-page-back", "qjpbFontSize", {
     name: game.i18n.localize("QJPB.settings.qjpbFontSize.name"),
     hint: game.i18n.localize("QJPB.settings.qjpbFontSize.hint"),
     scope: "client",
@@ -200,7 +200,7 @@ Hooks.once("init", () => {
     range: { min: 8, max: 32, step:1 }
     });
 
-    const fontSize = game.settings.get("quick-journal-page-back", "qjpsFontSize");
+    const fontSize = game.settings.get("quick-journal-page-back", "qjpbFontSize");
     document.documentElement.style.setProperty("--qjpb-font-size", `${fontSize}px`)
 
 console.log("QJPB: Quick-Journal-Page-Back has been initialized");
