@@ -1,3 +1,17 @@
+## [1.0.1] / 2026-06-03
+### Added
+- setting for changing button size
+### Fixed
+### Changed
+- css now ready for changing size of button
+- zIndex now taken from highest zIndex during init
+### Removed
+### Deprecated
+### Security
+
+### Comments
+A little helper which adds a back and forward button for Journals
+
 ## [1.0.0] / 2026-06-02
 ### Added
 - First fairly stable release

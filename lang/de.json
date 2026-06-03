@@ -3,5 +3,10 @@
   "QJPB.Forward": "Vorwärts",
   "QJPB.Disabled": "Keine weiteren Seiten im Verlauf",
   "QJPB.HistoryLength":"Verlaufslänge",
-  "QJPB.HistoryLengthHint": "Maximale gespeicherte Seiten pro Benutzer."
+  "QJPB.HistoryLengthHint": "Maximale gespeicherte Seiten pro Benutzer.",
+  "QJPB.settings.qjpbFontSize.name":"Font Größe",
+  "QJPB.settings.qjpbFontSize.hint":"Die Font Größe wird beeinflussen wie groß die Schaltflächen sind. Eventuell muss mit F5 das Modul manuell neu geladen werden.",
+  "QJPB.error.journalNotFound": "Übergeordnete Journal für die Seite nicht gefunden oder vom falschen Typ.",
+  "QJPB.error.pagelNotFound": "Seite für gesuchte UUID nicht gefunden - UUID: ",
+  "QJPB.error.pagelHistoryNotInit":"QJPB: Seiten Verlauf noch nicht initialisiert."
 }

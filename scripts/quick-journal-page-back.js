@@ -1,23 +1,25 @@
 /**
  * Quick-Journal-Page-Back – Foundry VTT V13 & V14
+ * A small plugin that adds a history cache for visited pages and allows to navigate forward and backward.
  */
 
 // Hooks.events in console to investigate Hooks
 //CONFIG.debug.hooks = true
 
 let pageHistory = null;
+let zIndex = null; //for now a dirty fix unless I figure out if or how I can adjust during init to work with GM Screen and any pinned Journals in that app
 
 class JournalHistoryManager {
+    // If a user connects we delete his history cache and also manage each user seperately 
+    // TODO: Was a first good idea and works but check if this makes sense as the data seems scoped anyway
     constructor(maxLength) {
-        this.MAX_LENGTH = maxLength-1; // Max. Seiten pro Nutzer (aus den Einstellungen)
+        this.MAX_LENGTH = maxLength-1; // Max stored history pages for each user
         this.userHistories = new Map(); // Key: User ID, Value: Array<PageID>
         this.connectedUser= new Set(); //active user tracking - results in unique key in map
-        this.forwardHistory= [];
-        this.backwardHistory= [];
         this._buttonAction = 0; //0 not pressed, 1 = forward, 2 = backward, 3 = any button
         this.suppressedPageUuid = null; // added tracker of supressedUUID
         this.historyIndex = -1;
-        // Wenn ein Benutzer verbunden wird, leeren wir seine Historie neu (oder laden sie aus Storage)
+        
     }
 
 set buttonAction(button){
@@ -45,78 +47,54 @@ shouldSkipHistoryPage(pageUuid) {
 
 async goForward(){
 
-const activeUser = game.user.id;
-let JournalList = this.getHistoryList(activeUser)
+const activeUser = game.user.id; //get the active user to retrieve HIS list
+let JournalList = this.getHistoryList(activeUser) //get the users history List
 
-const backHistoryLength =JournalList.length;
-
-console.log("QJPB:5 I WENT FOWARD - index is: ",this.historyIndex)
-if(this.historyIndex>backHistoryLength-1){this.historyIndex=backHistoryLength-1;}
-console.log("QJPB:5 I WENT FOWARD - index is after check is: ",this.historyIndex)
+const backHistoryLength =JournalList.length; //get the current length of the history list
+if(this.historyIndex>backHistoryLength-1){this.historyIndex=backHistoryLength-1;} // make sure the index for the tracking cannot go beyond the actuall JournalList length
 this.historyIndex = this.historyIndex-1;
-if(this.historyIndex<0){this.historyIndex=0};
+if(this.historyIndex<0){this.historyIndex=0};// make sure the index for the tracking cannot go below the actuall JournalList index which is 0 for arrays
 
+if(backHistoryLength>this.historyIndex && this.historyIndex<backHistoryLength){ //make sure historyIndex is in between max and min of JournalList length
 
-if(backHistoryLength>this.historyIndex && this.historyIndex<backHistoryLength){
-
-  console.log("QJPB:5 Forward History Index: ",this.historyIndex)
-const uuid = JournalList[this.historyIndex];
-console.log("QJPB:5 Forward Page UUID: ",uuid)
-this.buttonAction = 3; // open by code
-this.suppressNextPage(uuid); //add
-//pageHistory.buttonAction = 3;
-console.log("QJPB:5 Forward Button State before code open: ",this.buttonAction)
-//console.log("QJPB:== Page History before code open ",pageHistory)
-await openJournalAndShowPage(uuid);
-//this.buttonAction = 0; //restore old setting
-console.log("QJPB:5 Forward Button State: ",this.buttonAction)
+const uuid = JournalList[this.historyIndex]; //get the uuid of the PAGE which is a FULL foundry UUUID -->Journal.xxx.Page.yyy from the JournalList
+this.buttonAction = 3; // indicate action was triggered by button and not manually
+this.suppressNextPage(uuid); //So do not add any page we are just navigating
+await openJournalAndShowPage(uuid); //Navigate to page according to history in JournalList
 
 }}
 
 async goBackward(){
-console.log("QJPB:5 I WENT BACK",this.historyIndex)
 const activeUser = game.user.id;
-console.log("QJPB:5 Back game user id");
 let JournalList = this.getHistoryList(activeUser)
-console.log("QJPB:5 Back history list",this.historyIndex);
-if(this.historyIndex===-1){this.historyIndex=0}
-console.log("QJPB:5 Back history after historyIndex===-1",this.historyIndex);
+
+if(this.historyIndex===-1){this.historyIndex=0} // if the history index is -1 it was reset by a manual navigation and we need to start our index at 0
+
 const backHistoryLength = JournalList.length;
 this.historyIndex = this.historyIndex+1;
 if(this.historyIndex>backHistoryLength-1){this.historyIndex=backHistoryLength-1;}
 
 if(backHistoryLength>this.historyIndex && this.historyIndex<backHistoryLength){
-if(this.historyIndex>this.MAX_LENGTH){this.historyIndex=this.MAX_LENGTH};
-console.log("QJPB:5 ende");
-  
-    
-// Usage:
-console.log("QJPB:5 History Index: ",this.historyIndex)
+if(this.historyIndex>this.MAX_LENGTH){this.historyIndex=this.MAX_LENGTH}; // make sure we cannot go back more than defined in settings
+
 const uuid = JournalList[this.historyIndex];
-console.log("QJPB:5 Page UUID: ",uuid)
-this.buttonAction = 3; // open by code
-this.suppressNextPage(uuid); //added
-//pageHistory.buttonAction = 3;
-console.log("QJPB:5 Button State before code open: ",this.buttonAction)
-//console.log("QJPB:== Page History before code open ",pageHistory)
+this.buttonAction = 3; // indicate action was triggered by button and not manually
+this.suppressNextPage(uuid);
 await openJournalAndShowPage(uuid);
 //this.buttonAction = 0; //restore old setting
-console.log("QJPB:5 Button State after show page: ",this.buttonAction);
-console.log("QJPB:5 List of Pages after showPage: ", this.userHistories);
-
-//const journal = await fromUuid(JournalList[0]);
-//journal.sheet.render(true);
   }}
-    //=== "Other functions of the objekt" ===
+
+
+//=== "Other functions of the objekt" ===
     // creates the history list or removes it from the array (on connect or disconnect) - making sure shaky connects do not play havoc
   manageHistoryListExistence(userId){
       if (this.connectedUser.has(userId)){
            if (!this.userHistories.has(userId)) {
-            this.userHistories.set(userId, []); // Initialisiere die Historie für diesen Nutzer
+            this.userHistories.set(userId, []); // Init the history for the user
         }
       } else {
          if (this.userHistories.has(userId)) {
-            this.userHistories.delete(userId); // Verwirft die Historie für diesen Nutzer
+            this.userHistories.delete(userId); // Drop the history for the user
         }
       }
   }
@@ -130,7 +108,7 @@ console.log("QJPB:5 List of Pages after showPage: ", this.userHistories);
 
   }
 
-  // Speichert die ID der aktuell angesehenen Seite und pflegt die Historie auf MAX_LENGTH.
+  // Adds the Journal+Page ID of a visited page and makes sure it does not exceed MAX_LENGTH.
   // @param {string} pageId - Die UUID der Journal Page.
   addHistoryPage(pageId){
 
@@ -140,7 +118,8 @@ console.log("QJPB:5 List of Pages after showPage: ", this.userHistories);
         // adds a new page at the sart of the array
         currentHistoryList.unshift(pageId); 
         //this.historyIndex = -1; // No manual selection of page took place so reset historyIndex
-        // Kürze das Array, falls es zu lang wird
+        
+        // shorten the array if it exceeds the defined lenght
         if (currentHistoryList.length > this.MAX_LENGTH) {
             currentHistoryList = currentHistoryList.slice(0, this.MAX_LENGTH);
         }
@@ -158,7 +137,7 @@ console.log("QJPB:5 List of Pages after showPage: ", this.userHistories);
   ;
 
 Hooks.once("init", () => {
-console.log("QJPB: INIT highest zIndex",foundry.applications.api.ApplicationV2._maxZ)
+  zIndex = foundry.applications.api.ApplicationV2._maxZ;
 
   // init an object to hold Page History
     pageHistory = new JournalHistoryManager(30);
@@ -188,7 +167,7 @@ console.log("QJPB: INIT highest zIndex",foundry.applications.api.ApplicationV2._
   Hooks.on("userConnected", (user, connected) => {
     // user data with id and/or uuid
     //connected = true/false
-    console.log("QJPB: User on userConnected1: ",user);
+    //console.log("QJPB: User on userConnected1: ",user);
     
             if (connected) {
             pageHistory.connectedUser.add(user.id);
@@ -202,33 +181,43 @@ console.log("QJPB: INIT highest zIndex",foundry.applications.api.ApplicationV2._
 
   // Register settings
   game.settings.register("quick-journal-page-back", "historyLength", {
-    name: game.i18n.localize("QJPB.HistoryLength") || "Verlaufslänge",
-    hint: game.i18n.localize("QJPB.HistoryLengthHint") || "Maximale gespeicherte Seiten pro Benutzer.",
+    name: game.i18n.localize("QJPB.HistoryLength"),
+    hint: game.i18n.localize("QJPB.HistoryLengthHint"),
     scope: "client",
     config: true,
     type: Number,
     default: 20,
-    range: { min: 1, max: 50, step:1 }
+    range: { min: 2, max: 50, step:1 }
   });
-  
-console.log("QJPB: Quick-Journal-Page-Back initialized");
+
+    game.settings.register("quick-journal-page-sort", "qjpsFontSize", {
+    name: game.i18n.localize("QJPB.settings.qjpbFontSize.name"),
+    hint: game.i18n.localize("QJPB.settings.qjpbFontSize.hint"),
+    scope: "client",
+    config: true,
+    type: Number,
+    default: 18,
+    range: { min: 8, max: 32, step:1 }
+    });
+
+    const fontSize = game.settings.get("quick-journal-page-back", "qjpsFontSize");
+    document.documentElement.style.setProperty("--qjpb-font-size", `${fontSize}px`)
+
+console.log("QJPB: Quick-Journal-Page-Back has been initialized");
 });
 
 Hooks.once("ready",() => {
-console.log("QJPB: Ready Hook Entered ==> List of users at start:", game.users.contents);
+//console.log("QJPB: Ready Hook Entered ==> List of users at start:", game.users.contents);
 
             let activeUsers = game.users.contents;
-            if (activeUsers.length>=1) { //this should not be a problem if there allways should be on active user
+            if (activeUsers.length>=1) { //this should not be a problem if there allways should be on active user but better safe than sorry
 
               activeUsers.forEach((user, index) => {
                 if (user.active){
-                  console.log("QJPB: Show active users: ", user.name)
                   pageHistory.connectedUser.add(user.id)
                   pageHistory.manageHistoryListExistence(user.id);
                 }
               });
-                //console.log("QJPB: connected user: ",pageHistory.connectedUser);
-                //console.log("QJPB: pageHistories: ",pageHistory.userHistories);
             }
         
     pageHistory.MAX_LENGTH = (game.settings.get("quick-journal-page-back", "historyLength") ?? 30)-1;
@@ -236,23 +225,17 @@ console.log("QJPB: Ready Hook Entered ==> List of users at start:", game.users.c
 })
 
 Hooks.on("renderJournalEntryPageSheet", (data) => {
-//console.log("QJPB: renderJournalEntryPageSheet ",data);
+//console.log("QJPB: Entered renderJournalEntryPageSheet ",data);
 
-//foundry.applications.api.ApplicationV2._maxZ
-console.log("QJPB: Actuall highest zIndex",foundry.applications.api.ApplicationV2._maxZ)
-if (data.position.zIndex>100){ //this is a "fix" for GM Screenwhich has azIndex of 100. 
+if (data.position.zIndex>zIndex){ //this is a "fix" for GM Screenwhich has a zIndex of 100. 
                               //It assumes any journal opened manually later on the GUI will have a higher zIndex and stack on the GUI
 const activeUser = game.user.id;
 const pageId = data?.document?.uuid;
   if (!pageHistory) {
-    console.log("QJPB: PageHistory not initialized yet; skip or queue the view");
+    console.error(game.i18n.localize("QJPB.error.pagelHistoryNotInit"));
     return;
   }
 
-console.log("QJPB: Page Entry rendering; ",pageId)
-console.log("QJPB: Direkt info: ",pageHistory.userHistories)
-console.log("QJPB: List of Pages: ",pageHistory.getHistoryList(activeUser))
-//console.log("QJPB: Button Action Status Entry State: ",pageHistory.buttonAction);
 // add return before page is added and reset page
 if (pageHistory.shouldSkipHistoryPage(pageId)) {
   //console.log("QJPB: page navigation skipped: ", pageId);
@@ -261,7 +244,7 @@ if (pageHistory.shouldSkipHistoryPage(pageId)) {
 
 if (pageHistory.buttonAction === 0){
   if (pageHistory.historyIndex >-1){
-   //replace the old history list with the history from the current index onward as the user branched
+   //replace the old history list with the history from the current index onward as the user branched with his manual entry
     const historyFromIndex= pageHistory.getHistoryList(activeUser).slice(pageHistory.historyIndex)
     pageHistory.userHistories.set(activeUser, historyFromIndex)
   }
@@ -271,10 +254,8 @@ if (pageHistory.buttonAction === 0){
 }
 });
 
-// Render or Journal open/rendering function
+// Hook/Create our buttons into the Journal sidebar
 function qjpbButtonCreation(sheet, html) {
-    //console.log("== A journal was rendered (opened)");
-
 
     //get the container div holding the prev, add page and next button
     const container = html.querySelector("aside.journal-sidebar .action-buttons.flexrow");
@@ -285,14 +266,16 @@ function qjpbButtonCreation(sheet, html) {
     const buttonBack = document.createElement('button');
     buttonBack.className = 'qjp-back';  // add own class for possible later styling
     buttonBack.title = game.i18n.localize("QJPB.Back");         // Native title for tooltip
-    buttonBack.innerHTML = '<i class="fa-solid fa-clock-rotate-left"></i>';  // Font awesom icon/classes
+    buttonBack.innerHTML = '<i class="fa-solid fa-clock-rotate-left"></i>';  // Font awesome icon/classes
+    
     //add listener to the back button
     buttonBack.addEventListener('click', async () => {
-      //console.log("QJPB: Back");
+      //console.log("QJPB: Back button was triggered");
       if (pageHistory) {
         pageHistory.buttonAction = 2;
         await pageHistory.goBackward()
-      } else {console.log("QJPB: pageHistory not yet initialized");}
+      } else {
+        console.error(game.i18n.localize("QJPB.error.pagelHistoryNotInit"));}
     });
 
 
@@ -316,7 +299,7 @@ function qjpbButtonCreation(sheet, html) {
     if (!qjpContainer) {
     // create group div for new Buttons
     const newDiv = document.createElement('div');
-    newDiv.classList.add('flexrow', 'qjp-buttons','qjpb');  // buttonS class added to div
+    newDiv.classList.add('flexrow', 'qjp-buttons','qjpb');  // buttons class for qjp-BACK added to div
     //adding buttons to new group div
     newDiv.appendChild(buttonForward);
     newDiv.appendChild(buttonBack);
@@ -356,7 +339,8 @@ async function openJournalAndShowPage(uuid) {
   // Resolve the page from the (full) UUID
   const page = await fromUuid(uuid);
   if (!page) {
-    ui.notifications.error("Page not found for UUID: " + uuid);
+    ui.notifications.error(game.i18n.localize("QJPB.error.pagelNotFound") + uuid);
+    console.error(game.i18n.localize("QJPB.error.pagelNotFound") + uuid);
     return;
   }
 
@@ -364,7 +348,8 @@ async function openJournalAndShowPage(uuid) {
   const journal = page.parent;
   // Make sure a journal was found and it is of "type" JournalEntry
   if (!journal || journal.documentName !== "JournalEntry") {
-    ui.notifications.error("Parent journal not found or of wrong type.");
+    ui.notifications.error(game.i18n.localize("QJPB.error.journalNotFound"));
+    console.error(game.i18n.localize("QJPB.error.journalNotFound"));
     return;
   }
 

@@ -1,22 +1,5 @@
-.journal-history-nav {
-  display: inline-flex;
-  gap: 0.25em;
-  align-items: center;
-  margin-right: 0.5em;
-}
-
-.journal-history-nav a {
-  cursor: pointer;
-  opacity: 0.8;
-  transition: opacity 0.2s;
-}
-
-.journal-history-nav a:hover {
-  opacity: 1;
-}
-
-.journal-history-nav a.disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-  pointer-events: none;
+.journal-sidebar .qjpb button {
+  padding-top: 1px;
+  padding-bottom: 1px;
+  font-size: var(--qjpb-font-size);
 }
