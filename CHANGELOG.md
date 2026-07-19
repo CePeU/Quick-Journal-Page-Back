@@ -1,3 +1,21 @@
+## [1.0.4] / 2026-07-19
+### Added
+### Fixed
+- empty UUID message for v14
+### Changed
+### Removed
+### Deprecated
+### Security
+
+## [1.0.3] / 2026-06-03
+### Added
+### Fixed
+- an error was reported due to a fragment from cleanup which was not deleted
+### Changed
+### Removed
+### Deprecated
+### Security
+
 ## [1.0.2] / 2026-06-03
 ### Added
 ### Fixed

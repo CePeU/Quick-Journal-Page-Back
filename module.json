@@ -2,8 +2,8 @@
   "id": "quick-journal-page-back",
   "title": "Quick-Journal-Page-Back",
   "description": "Buttons for forward and backward navigation and history of the last visited pages. Compatible with v13 and v14.",
-  "version": "1.0.3",
-"authors": [
+  "version": "1.0.4",
+  "authors": [
     {
       "name": "CePeU",
       "discord": "CePeU",
@@ -15,9 +15,13 @@
     "verified": "14",
     "maximum": "14"
   },
-   "esmodules": ["scripts/quick-journal-page-back.js"],
-  "styles": ["styles/quick-journal-page-back.css"],
-"languages": [
+  "esmodules": [
+    "scripts/quick-journal-page-back.js"
+  ],
+  "styles": [
+    "styles/quick-journal-page-back.css"
+  ],
+  "languages": [
     {
       "lang": "en",
       "name": "English",
@@ -29,12 +33,12 @@
       "path": "lang/de.json"
     }
   ],
-"url": "https://github.com/CePeU/Quick-Journal-Page-Back",
-"manifest": "https://github.com/CePeU/Quick-Journal-Page-Back/releases/latest/download/module.json",
-"download": "https://github.com/CePeU/Quick-Journal-Page-Back/releases/latest/download/quick-journal-page-back.zip",
-"readme": "https://github.com/CePeU/Quick-Journal-Page-Back/blob/main/README.md",
-"bugs": "https://github.com/CePeU/Quick-Journal-Page-Back/issues",
-"changelog": "https://github.com/CePeU/Quick-Journal-Page-Back/blob/main/CHANGELOG.md",
-"library": false,
-"media": [] 
+  "url": "https://github.com/CePeU/Quick-Journal-Page-Back",
+  "manifest": "https://github.com/CePeU/Quick-Journal-Page-Back/releases/latest/download/module.json",
+  "download": "https://github.com/CePeU/Quick-Journal-Page-Back/releases/download/v1.0.4/quick-journal-page-back.zip",
+  "readme": "https://github.com/CePeU/Quick-Journal-Page-Back/blob/main/README.md",
+  "bugs": "https://github.com/CePeU/Quick-Journal-Page-Back/issues",
+  "changelog": "https://github.com/CePeU/Quick-Journal-Page-Back/blob/main/CHANGELOG.md",
+  "library": false,
+  "media": []
 }
